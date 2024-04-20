@@ -2,14 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Document</title>
+    <title>Animal Shelter</title>
 </head>
 <body>
-    <h1>Pet Finder</h1>
-    
-    <script src="script.js"></script>
+    <h1>Animal Shelter</h1>
+
+    <h2>All Pets</h2>
+    <ul id="allPets"></ul>
+
+    <h2>Find Pet by Name</h2>
+    <input type="text" id="petNameInput" placeholder="Enter pet name">
+    <button onclick="findPetByName()">Find Pet</button>
+    <p id="petByNameResult"></p>
+
+    <h2>Find Pets by Owner's Name</h2>
+    <input type="text" id="ownerNameInput" placeholder="Enter owner's name">
+    <button onclick="findPetsByOwner()">Find Pets</button>
+    <ul id="petsByOwnerResult"></ul>
+
+    <script>
+        async function getAllPets() {
+            const response = await fetch('/api/v1/pets');
+            const pets = await response.json();
+            const allPetsList = document.getElementById('allPets');
+            allPetsList.innerHTML = '';
+            pets.forEach(pet => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${pet.name} - Owner: ${pet.owner}`;
+                allPetsList.appendChild(listItem);
+            });
+        }
+
+        async function findPetByName() {
+            const petName = document.getElementById('petNameInput').value;
+            const response = await fetch(`/api/v1/pets/${petName}`);
+            const pet = await response.json();
+            const petByNameResult = document.getElementById('petByNameResult');
+            if (pet.id) {
+                petByNameResult.textContent = `${pet.name} - Owner: ${pet.owner}`;
+            } else {
+                petByNameResult.textContent = 'Pet not found!';
+            }
+        }
+
+        async function findPetsByOwner() {
+            const ownerName = document.getElementById('ownerNameInput').value;
+            const response = await fetch(`/api/v1/pets/owner?owner=${ownerName}`);
+            const pets = await response.json();
+            const petsByOwnerResult = document.getElementById('petsByOwnerResult');
+            petsByOwnerResult.innerHTML = '';
+            pets.forEach(pet => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${pet.name}`;
+                petsByOwnerResult.appendChild(listItem);
+            });
+        }
+
+        window.onload = function() {
+            getAllPets();
+        };
+    </script>
 </body>
 </html>
